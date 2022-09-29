@@ -55,7 +55,7 @@ def fetch_changes_from_drive(drive_service):
             .getStartPageToken(
                 supportsAllDrives=True,
             )
-            .execute()
+            .execute(num_retries=10)
         )
         new_start_page_token = response.get("startPageToken", None)
 
@@ -75,7 +75,7 @@ def fetch_changes_from_drive(drive_service):
                 includeItemsFromAllDrives=True,
                 supportsAllDrives=True,
             )
-            .execute()
+            .execute(num_retries=10)
         )
 
         next_page_token = response.get("nextPageToken", None)
@@ -108,7 +108,7 @@ def fetch_files_and_folders_from_drive(drive_service):
                 includeItemsFromAllDrives=True,
                 supportsAllDrives=True,
             )
-            .execute()
+            .execute(num_retries=10)
         )
         next_page_token = response.get("nextPageToken", None)
 
@@ -221,14 +221,14 @@ def fetch_files_content(drive_service, files):
                     .export_media(
                         fileId=file["id"], mimeType=type_conversion[file["mimeType"]]
                     )
-                    .execute()
+                    .execute(num_retries=10)
                 )
                 file["content"] = response.decode("utf-8")
             if file.get("mimeType", "") == "application/pdf":
                 response = (
                     drive_service.files()
                     .get_media(fileId=file["id"], supportsAllDrives=True)
-                    .execute()
+                    .execute(num_retries=10)
                 )
                 with pdfplumber.open(io.BytesIO(response)) as pdf:
                     for page in pdf.pages[:100]:
